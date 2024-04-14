@@ -1,0 +1,9 @@
+{
+  "tasks": {
+    "start": "deno run --unstable-kv --allow-net main.ts"
+  },
+  "deno.suggest.imports.autoDiscover":true,
+  "deno.suggest.imports.hosts": {
+    "https://deno.land": true
+  }
+}
