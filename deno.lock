@@ -4,6 +4,9 @@
     "https://deno.land/std/dotenv/mod.ts": "https://deno.land/std@0.222.1/dotenv/mod.ts"
   },
   "remote": {
+    "https://deno.land/std@0.222.1/dotenv/mod.ts": "0180eaeedaaf88647318811cdaa418cc64dc51fb08354f91f5f480d0a1309f7d",
+    "https://deno.land/std@0.222.1/dotenv/parse.ts": "09977ff88dfd1f24f9973a338f0f91bbdb9307eb5ff6085446e7c423e4c7ba0c",
+    "https://deno.land/std@0.222.1/dotenv/stringify.ts": "275da322c409170160440836342eaa7cf012a1d11a7e700d8ca4e7f2f8aa4615",
     "https://deno.land/x/hono@v4.2.3/adapter/deno/serve-static.ts": "62b57d461ecebbc7b98809c4fc2a8358f0828d6e89cdc6841054e5bb3828fc80",
     "https://deno.land/x/hono@v4.2.3/client/client.ts": "120c68074f3f59563226808bc6c1f98bcf00545c6cd3ff66b8dd5664c9cd3c34",
     "https://deno.land/x/hono@v4.2.3/client/index.ts": "30def535310a37bede261f1b23d11a9758983b8e9d60a6c56309cee5f6746ab2",

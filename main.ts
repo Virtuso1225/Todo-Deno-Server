@@ -47,7 +47,6 @@ app.post("/todo/create", async (c) => {
 app.patch("/todo/update/:id", async (c) => {
   const body = await c.req.json();
   const id = c.req.param("id");
-  console.log(id);
   const todo = await kv.get<Todo>(["todo-list", id]);
   if (todo === undefined) {
     return c.json({ code: 404, message: "todo not found", data: null });
@@ -61,7 +60,6 @@ app.patch("/todo/update/:id", async (c) => {
 
 app.delete("/todo/delete/:id", async (c) => {
   const id = c.req.param("id");
-  console.log(id);
   await kv.delete(["todo-list", id]);
   return c.json({ code: 200, message: "todo delete success", data: null });
 });
