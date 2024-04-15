@@ -65,4 +65,4 @@ app.delete("/todo/delete/:id", async (c) => {
   return c.json({ code: 200, message: "todo delete success", data: null });
 });
 
-Deno.serve({ port: 8000 }, app.fetch);
+// Deno.serve({ port: 8000 }, app.fetch);
