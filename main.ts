@@ -1,15 +1,13 @@
 import { Hono } from "https://deno.land/x/hono@v4.2.3/mod.ts";
 import { cors } from "https://deno.land/x/hono@v4.2.3/middleware.ts";
 import { ulid } from "https://deno.land/x/ulid@v0.3.0/mod.ts";
-import { load } from "https://deno.land/std@0.222.1/dotenv/mod.ts";
 
 const app = new Hono();
 const kv = await Deno.openKv();
-const env = await load();
 app.use(
   "/*",
   cors({
-    origin: env["CORS_ORIGIN"] || "http://localhost:5173",
+    origin: "http://localhost:5173",
     allowMethods: ["POST", "PUT", "PATCH", "GET", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length", "X-Kuma-Revision"],
     maxAge: 600,
