@@ -9,7 +9,7 @@ const env = await load();
 app.use(
   "/*",
   cors({
-    origin: env["CORS_ORIGIN"] || "http://localhost:3000",
+    origin: env["CORS_ORIGIN"] || "http://localhost:5173",
     allowMethods: ["POST", "PUT", "PATCH", "GET", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length", "X-Kuma-Revision"],
     maxAge: 600,
