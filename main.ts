@@ -7,7 +7,7 @@ const kv = await Deno.openKv();
 app.use(
   "/*",
   cors({
-    origin: "http://localhost:5173",
+    origin: Deno.env.get("CORS_ORIGIN") || "",
     allowMethods: ["POST", "PUT", "PATCH", "GET", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length", "X-Kuma-Revision"],
     maxAge: 600,
