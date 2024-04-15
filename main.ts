@@ -4,6 +4,9 @@ import { ulid } from "https://deno.land/x/ulid@v0.3.0/mod.ts";
 
 const app = new Hono();
 const kv = await Deno.openKv();
+
+Deno.serve((_req) => new Response("Hello, world"));
+
 app.use(
   "/*",
   cors({
