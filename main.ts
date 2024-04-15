@@ -5,8 +5,6 @@ import { ulid } from "https://deno.land/x/ulid@v0.3.0/mod.ts";
 const app = new Hono();
 const kv = await Deno.openKv();
 
-Deno.serve((_req) => new Response("Hello, world"));
-
 app.use(
   "/*",
   cors({
@@ -23,6 +21,10 @@ interface Todo {
   content: string;
   isChecked: boolean;
 }
+
+app.get("/", (c) => {
+  return c.text("Hello, Deno!");
+});
 
 app.get("/todo", async (c) => {
   const iter = kv.list<Todo>({ prefix: ["todo-list"] });
@@ -65,4 +67,4 @@ app.delete("/todo/delete/:id", async (c) => {
   return c.json({ code: 200, message: "todo delete success", data: null });
 });
 
-// Deno.serve({ port: 8000 }, app.fetch);
+Deno.serve(app.fetch);
