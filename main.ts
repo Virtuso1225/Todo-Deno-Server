@@ -43,11 +43,8 @@ app.get("/todo/page", async (c) => {
   const iter = kv.list<Todo>({ prefix: ["todo-list"] });
   const todos: Todo[] = [];
   for await (const res of iter) todos.push(res.value);
-  return c.json({
-    code: 200,
-    message: "success",
-    data: Math.ceil(todos.length / itemSize),
-  });
+  const totalPage = Math.ceil(todos.length / itemSize);
+  return c.json({ code: 200, message: "success", data: totalPage });
 });
 
 app.post("/todo/create", async (c) => {
