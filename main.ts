@@ -28,36 +28,35 @@ app.get("/", (c) => {
 
 app.get("/todo", async (c) => {
   const pageStr = c.req.query("page");
-  const page = parseInt(pageStr ?? "1");
-  const filter = c.req.query("filter") ?? "all";
+  const page = pageStr ? parseInt(pageStr) : 1;
+  const filter = c.req.query("filter");
   const itemSize = 6;
   const startIndex = (page - 1) * itemSize; //info: page starts with 1
   const endIndex = startIndex + itemSize;
-
+  const iter = kv.list<Todo>({ prefix: ["todo-list"] });
   const todos: Todo[] = [];
-  const KVprefix = ["todo-list"];
+  for await (const res of iter) todos.push(res.value);
+
+  let returnTodos = todos.slice(startIndex, endIndex);
   switch (filter) {
-    case "all": {
+    case "all":
       break;
-    }
-    case "checked": {
-      KVprefix.push("checked");
+    case "checked":
+      returnTodos = todos.filter((todo) => todo.isChecked).slice(
+        startIndex,
+        endIndex,
+      );
       break;
-    }
-    case "unchecked": {
-      KVprefix.push("unchecked");
+    case "unchecked":
+      returnTodos = todos.filter((todo) => !todo.isChecked).slice(
+        startIndex,
+        endIndex,
+      );
       break;
-    }
     default:
       break;
   }
-  const iter = kv.list<Todo>({ prefix: KVprefix });
-  for await (const res of iter) todos.push(res.value);
-  return c.json({
-    code: 200,
-    message: "success",
-    data: todos.slice(startIndex, endIndex),
-  });
+  return c.json({ code: 200, message: "success", data: returnTodos });
 });
 
 app.get("/todo/count", async (c) => {
@@ -92,7 +91,7 @@ app.post("/todo/create", async (c) => {
   }
   const id = ulid();
   const result = await kv.set(
-    ["todo-list", id, "unchecked"],
+    ["todo-list", id],
     { id, content: body.content, isChecked: false } as Todo,
   );
   return c.json({ code: 200, message: "todo creation success", data: result });
@@ -105,11 +104,7 @@ app.patch("/todo/update/:id", async (c) => {
   if (todo === undefined) {
     return c.json({ code: 404, message: "todo not found", data: null });
   }
-  const result = await kv.set([
-    "todo-list",
-    id,
-    body.isChecked ? "checked" : "unchecked",
-  ], {
+  const result = await kv.set(["todo-list", id], {
     ...todo.value,
     isChecked: body.isChecked,
   });
@@ -120,14 +115,6 @@ app.delete("/todo/delete/:id", async (c) => {
   const id = c.req.param("id");
   await kv.delete(["todo-list", id]);
   return c.json({ code: 200, message: "todo delete success", data: null });
-});
-
-app.delete("/todo/delete/all", async (a) => {
-  const iter = kv.list<Todo>({ prefix: ["todo-list"] });
-  for await (const res of iter) {
-    await kv.delete(["todo-list", res.value.id]);
-  }
-  return a.json({ code: 200, message: "all todos deleted", data: null });
 });
 
 Deno.serve(app.fetch);
