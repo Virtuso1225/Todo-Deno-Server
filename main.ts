@@ -34,7 +34,7 @@ app.get("/todo/page/:id", async (c) => {
   const iter = kv.list<Todo>({ prefix: ["todo-list"] });
   const todos: Todo[] = [];
   for await (const res of iter) todos.push(res.value);
-  const paginatedTodos = todos.slice(startIndex, endIndex);
+  const paginatedTodos = todos.slice(0, endIndex);
   return c.json({ code: 200, message: "success", data: paginatedTodos });
 });
 
