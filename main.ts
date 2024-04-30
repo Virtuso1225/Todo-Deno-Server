@@ -22,20 +22,6 @@ interface Todo {
   isChecked: boolean;
 }
 
-interface TodoPaginationRes {
-  todos: Todo[];
-  progress: {
-    finished: number;
-    left: number;
-  };
-}
-
-interface CommonResponse<T> {
-  code: number;
-  message: string;
-  data: T;
-}
-
 app.get("/", (c) => {
   return c.text("Hello, Deno!");
 });
@@ -49,16 +35,7 @@ app.get("/todo/page/:id", async (c) => {
   const todos: Todo[] = [];
   for await (const res of iter) todos.push(res.value);
   const paginatedTodos = todos.slice(startIndex, endIndex);
-  const finished = todos.filter((todo) => todo.isChecked === true).length;
-  const left = todos.length - finished;
-  return c.json({
-    code: 200,
-    message: "success",
-    data: {
-      todos: paginatedTodos,
-      progress: { finished, left },
-    },
-  } as CommonResponse<TodoPaginationRes>);
+  return c.json({ code: 200, message: "success", data: paginatedTodos });
 });
 
 app.get("/todo/count", async (c) => {
@@ -68,6 +45,21 @@ app.get("/todo/count", async (c) => {
   for await (const res of iter) todos.push(res.value);
   const totalPage = Math.ceil(todos.length / itemSize);
   return c.json({ code: 200, message: "success", data: totalPage });
+});
+
+app.get("/todo/dashboard", async (c) => {
+  const iter = kv.list<Todo>({ prefix: ["todo-list"] });
+  const todos: Todo[] = [];
+  for await (const res of iter) todos.push(res.value);
+  const total = todos.length;
+  const finished = todos.filter((todo) => todo.isChecked).length;
+  const left = total - finished;
+  const progress = (finished / total) * 100;
+  return c.json({
+    code: 200,
+    message: "success",
+    data: { progress, finished, left },
+  });
 });
 
 app.post("/todo/create", async (c) => {
