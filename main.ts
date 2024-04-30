@@ -22,6 +22,20 @@ interface Todo {
   isChecked: boolean;
 }
 
+interface TodoPaginationRes {
+  todos: Todo[];
+  progress: {
+    finished: number;
+    left: number;
+  };
+}
+
+interface CommonResponse<T> {
+  code: number;
+  message: string;
+  data: T;
+}
+
 app.get("/", (c) => {
   return c.text("Hello, Deno!");
 });
@@ -34,8 +48,17 @@ app.get("/todo/page/:id", async (c) => {
   const iter = kv.list<Todo>({ prefix: ["todo-list"] });
   const todos: Todo[] = [];
   for await (const res of iter) todos.push(res.value);
-  const paginatedTodos = todos.slice(0, endIndex);
-  return c.json({ code: 200, message: "success", data: paginatedTodos });
+  const paginatedTodos = todos.slice(startIndex, endIndex);
+  const finished = todos.filter((todo) => todo.isChecked === true).length;
+  const left = todos.length - finished;
+  return c.json({
+    code: 200,
+    message: "success",
+    data: {
+      todos: paginatedTodos,
+      progress: { finished, left },
+    },
+  } as CommonResponse<TodoPaginationRes>);
 });
 
 app.get("/todo/count", async (c) => {
