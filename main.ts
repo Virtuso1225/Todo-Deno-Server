@@ -36,51 +36,38 @@ app.get("/todo", async (c) => {
   const iter = kv.list<Todo>({ prefix: ["todo-list"] });
   const todos: Todo[] = [];
   for await (const res of iter) todos.push(res.value);
-
+  let total = todos.length;
   let returnTodos = todos.slice(startIndex, endIndex);
   switch (filter) {
     case "all":
       break;
     case "checked":
-      returnTodos = todos.filter((todo) => todo.isChecked).slice(
-        startIndex,
-        endIndex,
-      );
+      {
+        returnTodos = todos.filter((todo) => todo.isChecked).slice(
+          startIndex,
+          endIndex,
+        );
+        total = todos.filter((todo) => todo.isChecked).length;
+      }
       break;
     case "unchecked":
-      returnTodos = todos.filter((todo) => !todo.isChecked).slice(
-        startIndex,
-        endIndex,
-      );
-      break;
-    default:
-      break;
-  }
-  return c.json({ code: 200, message: "success", data: returnTodos });
-});
-
-app.get("/todo/count", async (c) => {
-  const filter = c.req.query("filter");
-  const itemSize = 6;
-  const iter = kv.list<Todo>({ prefix: ["todo-list"] });
-  const todos: Todo[] = [];
-  for await (const res of iter) todos.push(res.value);
-  let total = todos.length;
-  switch (filter) {
-    case "all":
-      break;
-    case "checked":
-      total = todos.filter((todo) => todo.isChecked).length;
-      break;
-
-    case "unchecked":
-      total = todos.filter((todo) => !todo.isChecked).length;
+      {
+        returnTodos = todos.filter((todo) => !todo.isChecked).slice(
+          startIndex,
+          endIndex,
+        );
+        total = todos.filter((todo) => !todo.isChecked).length;
+      }
       break;
     default:
       break;
   }
   const totalPage = Math.ceil(total / itemSize);
-  return c.json({ code: 200, message: "success", data: totalPage });
+  return c.json({
+    code: 200,
+    message: "success",
+    data: { todos: returnTodos, totalPage },
+  });
 });
 
 app.get("/todo/dashboard", async (c) => {
