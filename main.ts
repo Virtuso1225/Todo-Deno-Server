@@ -26,11 +26,28 @@ app.get("/", (c) => {
   return c.text("Hello, Deno!");
 });
 
-app.get("/todo", async (c) => {
+app.get("/todo/:page", async (c) => {
+  const page = parseInt(c.req.param("page"));
+  const itemSize = 6;
+  const startIndex = (page - 1) * itemSize; //info: page starts with 1
+  const endIndex = startIndex + itemSize;
   const iter = kv.list<Todo>({ prefix: ["todo-list"] });
   const todos: Todo[] = [];
   for await (const res of iter) todos.push(res.value);
-  return c.json({ code: 200, message: "success", data: todos });
+  const paginatedTodos = todos.slice(startIndex, endIndex);
+  return c.json({ code: 200, message: "success", data: paginatedTodos });
+});
+
+app.get("/todo/page", async (c) => {
+  const itemSize = 6;
+  const iter = kv.list<Todo>({ prefix: ["todo-list"] });
+  const todos: Todo[] = [];
+  for await (const res of iter) todos.push(res.value);
+  return c.json({
+    code: 200,
+    message: "success",
+    data: Math.ceil(todos.length / itemSize),
+  });
 });
 
 app.post("/todo/create", async (c) => {
