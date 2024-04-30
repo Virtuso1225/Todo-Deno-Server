@@ -123,7 +123,10 @@ app.delete("/todo/delete/:id", async (c) => {
 });
 
 app.delete("/todo/delete/all", async (a) => {
-  await kv.delete(["uncheked"]);
+  const iter = kv.list<Todo>({ prefix: ["todo-list"] });
+  for await (const res of iter) {
+    await kv.delete(["todo-list", res.value.id]);
+  }
   return a.json({ code: 200, message: "all todos deleted", data: null });
 });
 
