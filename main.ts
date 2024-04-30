@@ -26,8 +26,8 @@ app.get("/", (c) => {
   return c.text("Hello, Deno!");
 });
 
-app.get("/todo/:page", async (c) => {
-  const page = parseInt(c.req.param("page"));
+app.get("/todo/page/:id", async (c) => {
+  const page = parseInt(c.req.param("id"));
   const itemSize = 6;
   const startIndex = (page - 1) * itemSize; //info: page starts with 1
   const endIndex = startIndex + itemSize;
@@ -38,7 +38,7 @@ app.get("/todo/:page", async (c) => {
   return c.json({ code: 200, message: "success", data: paginatedTodos });
 });
 
-app.get("/todo/page", async (c) => {
+app.get("/todo/count", async (c) => {
   const itemSize = 6;
   const iter = kv.list<Todo>({ prefix: ["todo-list"] });
   const todos: Todo[] = [];
