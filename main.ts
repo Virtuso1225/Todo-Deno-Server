@@ -35,44 +35,29 @@ app.get("/todo", async (c) => {
   const endIndex = startIndex + itemSize;
 
   const todos: Todo[] = [];
+  const KVprefix = ["todo-list"];
   switch (filter) {
     case "all": {
-      const iter = kv.list<Todo>({ prefix: ["todo-list"] });
-      for await (const res of iter) todos.push(res.value);
-      return c.json({
-        code: 200,
-        message: "success",
-        data: todos.slice(startIndex, endIndex),
-      });
+      break;
     }
     case "checked": {
-      const iter = kv.list<Todo>({ prefix: ["todo-list", "checked"] });
-      for await (const res of iter) todos.push(res.value);
-      return c.json({
-        code: 200,
-        message: "success",
-        data: todos.slice(startIndex, endIndex),
-      });
+      KVprefix.push("checked");
+      break;
     }
     case "unchecked": {
-      const iter = kv.list<Todo>({ prefix: ["todo-list", "unchecked"] });
-      for await (const res of iter) todos.push(res.value);
-      return c.json({
-        code: 200,
-        message: "success",
-        data: todos.slice(startIndex, endIndex),
-      });
+      KVprefix.push("unchecked");
+      break;
     }
-    default: {
-      const iter = kv.list<Todo>({ prefix: ["todo-list"] });
-      for await (const res of iter) todos.push(res.value);
-      return c.json({
-        code: 200,
-        message: "success",
-        data: todos.slice(startIndex, endIndex),
-      });
-    }
+    default:
+      break;
   }
+  const iter = kv.list<Todo>({ prefix: KVprefix });
+  for await (const res of iter) todos.push(res.value);
+  return c.json({
+    code: 200,
+    message: "success",
+    data: todos.slice(startIndex, endIndex),
+  });
 });
 
 app.get("/todo/count", async (c) => {
