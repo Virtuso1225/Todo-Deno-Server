@@ -60,11 +60,26 @@ app.get("/todo", async (c) => {
 });
 
 app.get("/todo/count", async (c) => {
+  const filter = c.req.query("filter");
   const itemSize = 6;
   const iter = kv.list<Todo>({ prefix: ["todo-list"] });
   const todos: Todo[] = [];
   for await (const res of iter) todos.push(res.value);
-  const totalPage = Math.ceil(todos.length / itemSize);
+  let total = todos.length;
+  switch (filter) {
+    case "all":
+      break;
+    case "checked":
+      total = todos.filter((todo) => todo.isChecked).length;
+      break;
+
+    case "unchecked":
+      total = todos.filter((todo) => !todo.isChecked).length;
+      break;
+    default:
+      break;
+  }
+  const totalPage = Math.ceil(total / itemSize);
   return c.json({ code: 200, message: "success", data: totalPage });
 });
 
