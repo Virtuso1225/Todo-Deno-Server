@@ -1,12 +1,8 @@
 import { Hono } from "https://deno.land/x/hono@v4.2.3/mod.ts";
 import { cors, jwt } from "https://deno.land/x/hono@v4.2.3/middleware.ts";
 import { ulid } from "https://deno.land/x/ulid@v0.3.0/mod.ts";
-import * as bycrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
-import {
-  decode,
-  sign,
-  verify,
-} from "https://deno.land/x/hono@v4.2.3/utils/jwt/jwt.ts";
+import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import { decode, sign } from "https://deno.land/x/hono@v4.2.3/utils/jwt/jwt.ts";
 
 const app = new Hono();
 const kv = await Deno.openKv();
@@ -51,7 +47,7 @@ app.post("/signup", async (c) => {
     return c.json({ code: 400, message: "user already exists", data: res });
   }
   const id = ulid();
-  const hash = await bycrypt.hash(body.password);
+  const hash = await bcrypt.hash(body.password);
   await kv.set(["users", body.username], {
     id,
     username: body.username,
@@ -68,7 +64,7 @@ app.post("/login", async (c) => {
     return c.json({ code: 400, message: "user not found", data: null });
   }
   const password = res.value?.password;
-  const isValid = await bycrypt.compare(body.password, password);
+  const isValid = await bcrypt.compare(body.password, password);
   if (!isValid) {
     c.status(400);
     return c.json({ code: 400, message: "password is incorrect", data: null });
