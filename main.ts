@@ -1,7 +1,12 @@
 import { Hono } from "https://deno.land/x/hono@v4.2.3/mod.ts";
 import { cors, jwt } from "https://deno.land/x/hono@v4.2.3/middleware.ts";
 import { ulid } from "https://deno.land/x/ulid@v0.3.0/mod.ts";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import {
+  compare as comparePromise,
+  compareSync,
+  hash as hashPromise,
+  hashSync,
+} from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 import { decode, sign } from "https://deno.land/x/hono@v4.2.3/utils/jwt/jwt.ts";
 
 const app = new Hono();
@@ -19,6 +24,19 @@ app.use(
 );
 
 app.use("/auth/*", jwt({ secret: JWT_SECRET }));
+
+const isRunningInDenoDeploy = (globalThis as any).Worker === undefined;
+
+const hashFn: typeof hashPromise = isRunningInDenoDeploy
+  ? (plaintext: string, salt: string | undefined = undefined) =>
+    new Promise((res) => res(hashSync(plaintext, salt)))
+  : hashPromise;
+
+const compareFn: typeof comparePromise = isRunningInDenoDeploy
+  ? (plaintext: string, hash: string) =>
+    new Promise((res) => res(compareSync(plaintext, hash)))
+  : comparePromise;
+
 interface Todo {
   id: string;
   content: string;
@@ -47,7 +65,7 @@ app.post("/signup", async (c) => {
     return c.json({ code: 400, message: "user already exists", data: res });
   }
   const id = ulid();
-  const hash = await bcrypt.hash(body.password);
+  const hash = await hashFn(body.password);
   await kv.set(["users", body.username], {
     id,
     username: body.username,
@@ -64,7 +82,7 @@ app.post("/login", async (c) => {
     return c.json({ code: 400, message: "user not found", data: null });
   }
   const password = res.value?.password;
-  const isValid = await bcrypt.compare(body.password, password);
+  const isValid = await compareFn(body.password, password);
   if (!isValid) {
     c.status(400);
     return c.json({ code: 400, message: "password is incorrect", data: null });
