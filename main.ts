@@ -62,7 +62,7 @@ app.post("/signup", async (c) => {
   const res = await kv.get<User>(["users", body.username]);
   if (res.value !== null) {
     c.status(400);
-    return c.json({ code: 400, message: "user already exists", data: res });
+    return c.json({ code: 400, message: "user already exists", data: null });
   }
   const id = ulid();
   const hash = await hashFn(body.password);
