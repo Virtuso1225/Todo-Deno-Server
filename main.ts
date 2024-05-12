@@ -17,6 +17,11 @@ app.use(
     credentials: true,
   }),
 );
+const worker = new Worker(import.meta.resolve("./worker.ts"), {
+  type: "module",
+});
+
+worker.postMessage({ filename: "./log.txt" });
 
 app.use("/auth/*", jwt({ secret: JWT_SECRET }));
 interface Todo {
